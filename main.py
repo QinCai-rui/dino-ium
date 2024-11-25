@@ -66,6 +66,7 @@ large_cactus_bitmap = [
     0b001100,
     0b001100,
     0b001100,
+    0b111111,
     0b111111
 ]
 
@@ -75,7 +76,7 @@ class Dino:
     def __init__(self):
         self.x = 10
         self.y = 0
-        self.ground_y = 45
+        self.ground_y = 55
         self.jumping = False
         self.ducking = False
         self.jump_velocity = 0
@@ -110,14 +111,14 @@ class Obstacle:
         self.x = x
         self.speed = int(speed)
         self.graphics = random.choice(obstacle_bitmaps)
-        self.y = 45 - len(self.graphics)  # Adjust y position based on obstacle height
+        self.y = 55 - len(self.graphics)  # Adjust y position based on obstacle height
 
     def update(self):
         self.x -= self.speed
         if self.x < 0:
             self.x = 128 + random.randint(50, 100)
             self.graphics = random.choice(obstacle_bitmaps)
-            self.y = 45 - len(self.graphics)  # Adjust y position based on new obstacle height
+            self.y = 55 - len(self.graphics)  # Adjust y position based on new obstacle height
 
     def draw(self, oled):
         for i, line in enumerate(self.graphics):
@@ -131,7 +132,9 @@ class Game:
         self.dino = Dino()
         self.obstacles = [Obstacle(128, 2)]
         self.score = 0
+        self.dispScore = self.score
         self.game_running = True
+        self.timeWindow = 10000
 
     def check_collision(self):
         dino_top = self.dino.ground_y - self.dino.y - 20 if not self.dino.ducking else self.dino.ground_y - 10
@@ -159,7 +162,7 @@ class Game:
         self.dino.draw(self.oled)
         for obstacle in self.obstacles:
             obstacle.draw(self.oled)
-        self.oled.text(f'Score: {self.score}', 0, 0)
+        self.oled.text(f'Score: {self.dispScore}', 0, 0)
         self.oled.show()
 
     def run(self):
@@ -176,24 +179,38 @@ class Game:
             self.draw()
             sleep(0.01)
             
-            if ticks_ms() - start_time > 7500:  # Increase speed every 7.5 seconds
+            if ticks_ms() - start_time > self.timeWindow:  # Increase speed every timeWindow
                 for obstacle in self.obstacles:
                     obstacle.speed = int(obstacle.speed + 1)
                 start_time = ticks_ms()
-                print(obstacle.speed)
+                print(f"Obstacle speed: {obstacle.speed}")
+                print(f"{self.dispScore}")
+                self.timeWindow += 1000
+            
 
             for obstacle in self.obstacles:
                 speed = obstacle.speed
             self.score += int((speed-1))  # Increment score
+            self.dispScore = round((self.score / 10))
+            
+            
+            # Debugging
+            print(f"Raw Score: {self.score}")
+            print(f"Display Score: {self.dispScore}\n")
             
 
         # Display Game Over
         self.oled.fill(0)
-        self.oled.text("Game Over", 32, 32)
-        self.oled.text(f'Score: {self.score}', 32, 40)
+        self.oled.text("Game Over", 22, 25)
+        self.oled.text(f'Score: {self.dispScore}', 22, 35)
         self.oled.show()
 
-# Create Game instance and run the game
-game = Game(oled)
-game.run()
+if __name__ == "__main__":
+    try:
+        # Create Game instance and run the game
+        game = Game(oled)
+        game.run()
+    except KeyboardInterrupt:
+        oled.fill(0)
+        oled.show()
 
