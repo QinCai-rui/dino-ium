@@ -3,7 +3,7 @@ from ssd1306 import SSD1306_I2C
 from utime import sleep, ticks_ms
 import random
 
-# Overclock the Pi Pico to 120MHz for improved performance
+# Overclock the Pi Pico to 120MHz
 freq(120000000)  # 120MHz
 
 # Define I2C connection (SDA to GP16, SCL to GP17)
@@ -70,7 +70,13 @@ large_cactus_bitmap = [
     0b111111
 ]
 
-obstacle_bitmaps = [small_cactus_bitmap, medium_cactus_bitmap, large_cactus_bitmap]
+bird_bitmap = [
+    0b000011,
+    0b011111,
+    0b110000
+]
+
+obstacle_bitmaps = [bird_bitmap]
 
 class Dino:
     def __init__(self):
@@ -121,10 +127,15 @@ class Obstacle:
             self.y = 55 - len(self.graphics)  # Adjust y position based on new obstacle height
 
     def draw(self, oled):
+        print(self.graphics)
         for i, line in enumerate(self.graphics):
             for j in range(6 if len(self.graphics) == 6 else 8):
-                if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
-                    oled.pixel(self.x + j, self.y + i, 1)
+                if self.graphics != [3, 31, 48]:
+                    if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
+                        oled.pixel(self.x + j, self.y + i, 1)
+                else:
+                    if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
+                        oled.pixel(self.x + j, self.y + i - 10, 1)
 
 class Game:
     def __init__(self, oled):
@@ -212,3 +223,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         oled.fill(0)
         oled.show()
+
+
