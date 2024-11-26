@@ -71,12 +71,19 @@ large_cactus_bitmap = [
 ]
 
 bird_bitmap = [
-    0b000011,
-    0b011111,
-    0b110000
+    0b00001100,
+    0b00111110,
+    0b01111111,
+    0b11111111,
+    0b11111110,
+    0b11111110,
+    0b01111111,
+    0b00111110,
+    0b00001100
 ]
 
-obstacle_bitmaps = [bird_bitmap]
+obstacle_bitmaps = [small_cactus_bitmap, medium_cactus_bitmap, large_cactus_bitmap]
+
 
 class Dino:
     def __init__(self):
@@ -155,7 +162,7 @@ class Game:
 
         for obstacle in self.obstacles:
             obstacle_top = obstacle.y
-            obstacle_bottom = obstacle.y + (6 if len(obstacle.graphics) == 6 else 8)
+            obstacle_bottom = obstacle.y + (len(obstacle.graphics))
             obstacle_left = obstacle.x
             obstacle_right = obstacle.x + (6 if len(obstacle.graphics) == 6 else 8)
 
@@ -177,8 +184,14 @@ class Game:
         self.oled.show()
 
     def run(self):
+        global obstacle_bitmaps
         start_time = ticks_ms()
         while self.game_running:
+            if self.dispScore > 100 and (bird_bitmap not in obstacle_bitmaps):
+                obstacle_bitmaps.append(bird_bitmap)
+            elif self.dispScore <= 100 and bird_bitmap in obstacle_bitmaps:
+                obstacle_bitmaps.remove(bird_bitmap)
+                    
             if not jump_button.value():
                 self.dino.start_jump()
             if not duck_button.value():
@@ -192,13 +205,12 @@ class Game:
             
             if ticks_ms() - start_time > self.timeWindow:  # Increase speed every timeWindow
                 for obstacle in self.obstacles:
-                    obstacle.speed = int(obstacle.speed + 1)
+                    obstacle.speed += 1
                 start_time = ticks_ms()
                 print(f"Obstacle speed: {obstacle.speed}")
                 print(f"Display score: {self.dispScore}")
                 self.timeWindow += 1000
             
-
             for obstacle in self.obstacles:
                 speed = obstacle.speed
             self.score += int((speed-1))  # Increment score
@@ -207,6 +219,7 @@ class Game:
             # Debugging
             print(f"Raw Score: {self.score}")
             print(f"Display Score: {self.dispScore}\n")
+            print(len(obstacle_bitmaps))
             
 
         # Display Game Over
@@ -214,6 +227,7 @@ class Game:
         self.oled.text("Game Over", 22, 25)
         self.oled.text(f'Score: {self.dispScore}', 22, 35)
         self.oled.show()
+
 
 if __name__ == "__main__":
     try:
@@ -223,5 +237,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         oled.fill(0)
         oled.show()
-
-
