@@ -3,11 +3,11 @@ from ssd1306 import SSD1306_I2C
 from utime import sleep, ticks_ms
 import random
 
-# Overclock the Pi Pico to 125MHz
-freq(125000000)  # 125MHz
+# Overclock the Pi Pico to 120MHz for improved performance
+freq(120000000)  # 120MHz
 
 # Define I2C connection (SDA to GP16, SCL to GP17)
-i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=1000000)
+i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=900000)
 oled = SSD1306_I2C(128, 64, i2c)
 
 # Define pins for buttons
@@ -104,7 +104,7 @@ class Dino:
         for i, line in enumerate(graphics):
             for j in range(8):
                 if line & (1 << (7 - j)):
-                    oled.pixel(self.x + j, self.ground_y - self.y - (i * 2) if not self.ducking else self.ground_y - 10 + i, 1)
+                    oled.pixel(self.x + j, self.ground_y - self.y - (i * 2) if not self.ducking else self.ground_y - 3 + i, 1)
 
 class Obstacle:
     def __init__(self, x, speed):
@@ -184,7 +184,7 @@ class Game:
                     obstacle.speed = int(obstacle.speed + 1)
                 start_time = ticks_ms()
                 print(f"Obstacle speed: {obstacle.speed}")
-                print(f"{self.dispScore}")
+                print(f"Display score: {self.dispScore}")
                 self.timeWindow += 1000
             
 
@@ -192,7 +192,6 @@ class Game:
                 speed = obstacle.speed
             self.score += int((speed-1))  # Increment score
             self.dispScore = round((self.score / 10))
-            
             
             # Debugging
             print(f"Raw Score: {self.score}")
@@ -213,4 +212,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         oled.fill(0)
         oled.show()
-
