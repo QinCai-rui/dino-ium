@@ -3,7 +3,7 @@ from ssd1306 import SSD1306_I2C
 from utime import sleep, ticks_ms
 import random
 
-# Overclock the Pi Pico to 120MHz for improved performance
+# Overclock the Pi Pico to 120MHz
 freq(120000000)  # 120MHz
 
 # Define I2C connection (SDA to GP16, SCL to GP17)
@@ -70,7 +70,11 @@ large_cactus_bitmap = [
     0b111111
 ]
 
-obstacle_bitmaps = [small_cactus_bitmap, medium_cactus_bitmap, large_cactus_bitmap]
+bird_bitmap = [
+    0b000011,
+    0b011111,
+    0b110000
+]
 
 class Dino:
     def __init__(self):
@@ -110,41 +114,52 @@ class Obstacle:
     def __init__(self, x, speed):
         self.x = x
         self.speed = int(speed)
-        self.graphics = random.choice(obstacle_bitmaps)
+        self.graphics = random.choice(self.select_obstacle())
         self.y = 55 - len(self.graphics)  # Adjust y position based on obstacle height
+
+    def select_obstacle(self):
+        global obstacle_bitmaps
+        if Game.dispScore >= 100:  # Birds only appear after 100 points
+            return obstacle_bitmaps
+        return obstacle_bitmaps[:3]
 
     def update(self):
         self.x -= self.speed
         if self.x < 0:
             self.x = 128 + random.randint(50, 100)
-            self.graphics = random.choice(obstacle_bitmaps)
+            self.graphics = random.choice(self.select_obstacle())
             self.y = 55 - len(self.graphics)  # Adjust y position based on new obstacle height
 
     def draw(self, oled):
         for i, line in enumerate(self.graphics):
             for j in range(6 if len(self.graphics) == 6 else 8):
-                if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
-                    oled.pixel(self.x + j, self.y + i, 1)
+                if self.graphics != [3, 31, 48]:
+                    if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
+                        oled.pixel(self.x + j, self.y + i, 1)
+                else:
+                    if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
+                        oled.pixel(self.x + j, self.y + i - 10, 1)
 
 class Game:
+    dispScore = 0
+
     def __init__(self, oled):
         self.oled = oled
         self.dino = Dino()
         self.obstacles = [Obstacle(128, 2)]
         self.score = 0
-        self.dispScore = self.score
         self.game_running = True
         self.timeWindow = 10000
 
     def check_collision(self):
-        dino_top = self.dino.ground_y - self.dino.y - 20 if not self.dino.ducking else self.dino.ground_y - 10
+        dino_top = self.dino.ground_y - self.dino.y - 20 if not self.dino.ducking else self.dino.ground_y
         dino_bottom = self.dino.ground_y - self.dino.y if not self.dino.ducking else self.dino.ground_y
         dino_left = self.dino.x
         dino_right = self.dino.x + 10
 
         for obstacle in self.obstacles:
             obstacle_top = obstacle.y
-            obstacle_bottom = obstacle.y + (6 if len(obstacle.graphics) == 6 else 8)
+            obstacle_bottom = obstacle.y + (len(obstacle.graphics))
             obstacle_left = obstacle.x
             obstacle_right = obstacle.x + (6 if len(obstacle.graphics) == 6 else 8)
 
@@ -162,10 +177,11 @@ class Game:
         self.dino.draw(self.oled)
         for obstacle in self.obstacles:
             obstacle.draw(self.oled)
-        self.oled.text(f'Score: {self.dispScore}', 0, 0)
+        self.oled.text(f'Score: {Game.dispScore}', 0, 0)
         self.oled.show()
 
     def run(self):
+        global obstacle_bitmaps
         start_time = ticks_ms()
         while self.game_running:
             if not jump_button.value():
@@ -184,24 +200,23 @@ class Game:
                     obstacle.speed = int(obstacle.speed + 1)
                 start_time = ticks_ms()
                 print(f"Obstacle speed: {obstacle.speed}")
-                print(f"Display score: {self.dispScore}")
+                print(f"Display score: {Game.dispScore}")
                 self.timeWindow += 1000
             
-
             for obstacle in self.obstacles:
                 speed = obstacle.speed
             self.score += int((speed-1))  # Increment score
-            self.dispScore = round((self.score / 10))
+            Game.dispScore = round((self.score / 10))
             
             # Debugging
             print(f"Raw Score: {self.score}")
-            print(f"Display Score: {self.dispScore}\n")
+            print(f"Display Score: {Game.dispScore}\n")
             
 
         # Display Game Over
         self.oled.fill(0)
         self.oled.text("Game Over", 22, 25)
-        self.oled.text(f'Score: {self.dispScore}', 22, 35)
+        self.oled.text(f'Score: {Game.dispScore}', 22, 35)
         self.oled.show()
 
 if __name__ == "__main__":
