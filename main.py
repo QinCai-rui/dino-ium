@@ -118,7 +118,7 @@ class Obstacle:
         self.speed = int(speed)
         self.graphics = random.choice(self.select_obstacle())
         if self.graphics == bird_bitmap:
-            self.y = random.choice([35, 45])  # Birds should be higher up
+            self.y = 40  # Set bird at a specific height
         else:
             self.y = 55 - len(self.graphics)  # Adjust y position based on obstacle height
 
@@ -134,7 +134,7 @@ class Obstacle:
             self.x = 128 + random.randint(50, 100)
             self.graphics = random.choice(self.select_obstacle())
             if self.graphics == bird_bitmap:
-                self.y = random.choice([35, 45])  # Birds should be higher up
+                self.y = 40  # Set bird at a specific height
             else:
                 self.y = 55 - len(self.graphics)  # Adjust y position based on new obstacle height
 
