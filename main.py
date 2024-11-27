@@ -76,6 +76,8 @@ bird_bitmap = [
     0b110000
 ]
 
+obstacle_bitmaps = [small_cactus_bitmap, medium_cactus_bitmap, large_cactus_bitmap, bird_bitmap]
+
 class Dino:
     def __init__(self):
         self.x = 10
@@ -115,7 +117,10 @@ class Obstacle:
         self.x = x
         self.speed = int(speed)
         self.graphics = random.choice(self.select_obstacle())
-        self.y = 55 - len(self.graphics)  # Adjust y position based on obstacle height
+        if self.graphics == bird_bitmap:
+            self.y = random.choice([35, 45])  # Birds should be higher up
+        else:
+            self.y = 55 - len(self.graphics)  # Adjust y position based on obstacle height
 
     def select_obstacle(self):
         global obstacle_bitmaps
@@ -128,17 +133,16 @@ class Obstacle:
         if self.x < 0:
             self.x = 128 + random.randint(50, 100)
             self.graphics = random.choice(self.select_obstacle())
-            self.y = 55 - len(self.graphics)  # Adjust y position based on new obstacle height
+            if self.graphics == bird_bitmap:
+                self.y = random.choice([35, 45])  # Birds should be higher up
+            else:
+                self.y = 55 - len(self.graphics)  # Adjust y position based on new obstacle height
 
     def draw(self, oled):
         for i, line in enumerate(self.graphics):
             for j in range(6 if len(self.graphics) == 6 else 8):
-                if self.graphics != [3, 31, 48]:
-                    if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
-                        oled.pixel(self.x + j, self.y + i, 1)
-                else:
-                    if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
-                        oled.pixel(self.x + j, self.y + i - 10, 1)
+                if line & (1 << (5 - j if len(self.graphics) == 6 else 7 - j)):
+                    oled.pixel(self.x + j, self.y + i, 1)
 
 class Game:
     dispScore = 0
@@ -152,8 +156,8 @@ class Game:
         self.timeWindow = 10000
 
     def check_collision(self):
-        dino_top = self.dino.ground_y - self.dino.y - 20 if not self.dino.ducking else self.dino.ground_y
-        dino_bottom = self.dino.ground_y - self.dino.y if not self.dino.ducking else self.dino.ground_y
+        dino_top = self.dino.ground_y - self.dino.y - 20 if not self.dino.ducking else self.dino.ground_y - len(self.dino.ducking_graphics) - 5
+        dino_bottom = self.dino.ground_y - self.dino.y
         dino_left = self.dino.x
         dino_right = self.dino.x + 10
 
