@@ -3,11 +3,13 @@ from ssd1306 import SSD1306_I2C
 from utime import sleep, ticks_ms
 import random
 
-# Overclock the Pi Pico to 120MHz
-freq(120000000)  # 120MHz
+# Less overclocking of the Pico and I2C bus for stability
+
+# Overclock the Pi Pico to 100MHz
+freq(100000000)  # 100MHz
 
 # Define I2C connection (SDA to GP16, SCL to GP17)
-i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=900000)
+i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=400000)
 oled = SSD1306_I2C(128, 64, i2c)
 
 # Define pins for buttons
@@ -24,6 +26,7 @@ dino_bitmap = [
     0b11000011
 ]
 
+# Bitmap graphics for ducking dino
 dino_ducking_bitmap = [
     0b11111100,
     0b11111110,
@@ -70,6 +73,7 @@ large_cactus_bitmap = [
     0b111111
 ]
 
+# Simple bitmap for a bird
 bird_bitmap = [
     0b000011,
     0b011111,
@@ -100,7 +104,7 @@ class Dino:
         if self.jumping:
             self.y += self.jump_velocity
             self.jump_velocity += self.gravity
-            if self.y < 0:
+            if self.y < 0 or self.ducking:  # Not yet tested
                 self.y = 0
                 self.jumping = False
                 self.jump_velocity = 0
@@ -145,7 +149,7 @@ class Obstacle:
                     oled.pixel(self.x + j, self.y + i, 1)
 
 class Game:
-    dispScore = 0
+    dispScore = 0   # The score displayed on the OLED screen
 
     def __init__(self, oled):
         self.oled = oled
@@ -153,7 +157,7 @@ class Game:
         self.obstacles = [Obstacle(128, 2)]
         self.score = 0
         self.game_running = True
-        self.timeWindow = 10000
+        self.timeInterval = 10000   # Time interval between different levels
 
     def check_collision(self):
         dino_top = self.dino.ground_y - self.dino.y - 20 if not self.dino.ducking else self.dino.ground_y - len(self.dino.ducking_graphics) - 5
@@ -199,22 +203,22 @@ class Game:
             self.draw()
             sleep(0.01)
             
-            if ticks_ms() - start_time > self.timeWindow:  # Increase speed every timeWindow
+            if ticks_ms() - start_time > self.timeInterval:  # Increase speed every timeInterval
                 for obstacle in self.obstacles:
                     obstacle.speed = int(obstacle.speed + 1)
                 start_time = ticks_ms()
-                print(f"Obstacle speed: {obstacle.speed}")
+                print(f"New Obstacle speed: {obstacle.speed}")
                 print(f"Display score: {Game.dispScore}")
-                self.timeWindow += 1000
+                self.timeInterval += 1000   # Incresing the timeInterval so the game is not too fast
             
             for obstacle in self.obstacles:
                 speed = obstacle.speed
             self.score += int((speed-1))  # Increment score
             Game.dispScore = round((self.score / 10))
             
-            # Debugging
-            print(f"Raw Score: {self.score}")
-            print(f"Display Score: {Game.dispScore}\n")
+            # Uncomment for debugging
+            #print(f"Raw Score: {self.score}")
+            #print(f"Display Score: {Game.dispScore}\n")
             
 
         # Display Game Over
