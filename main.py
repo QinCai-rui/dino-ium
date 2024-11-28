@@ -201,7 +201,7 @@ class Game:
 
             self.update()
             self.draw()
-            sleep(0.01)
+            sleep(0.01) # Sleep time until next update
             
             if ticks_ms() - start_time > self.timeInterval:  # Increase speed every timeInterval
                 for obstacle in self.obstacles:
