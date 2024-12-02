@@ -9,7 +9,7 @@ import random
 freq(100000000)  # 100MHz
 
 # Define I2C connection (SDA to GP16, SCL to GP17)
-i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=400000)
+i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=1000000)
 oled = SSD1306_I2C(128, 64, i2c)
 
 # Define pins for buttons
