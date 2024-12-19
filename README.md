@@ -1,13 +1,13 @@
 # dino-ium
 
-Welcome to dino-ium! This project brings the classic dinosaur game (Chrome Dino) to life on a Raspberry Pi Pico with an SSD1306 OLED display. The game features a jumping dino that dodges obstacles like cacti and birds. Some versions are coded with help from Microsoft Copilot.
+Welcome to dino-ium! This project brings the classic dinosaur game (Chrome Dino) to life on a Raspberry Pi Pico with an SSD1306 OLED display. The game features a jumping dino that dodges obstacles like cacti and birds. Some versions are coded with help from Microsoft Copilot (e.g. the bitmaps).
 
 ## Features
 
 - **Dynamic Gameplay**: The game gets progressively harder and faster as the dino encounters more obstacles.
 - **Various Obstacles**: Includes small cacti, medium cacti, large cacti, and birds.
 - **Adaptive Difficulty**: Birds appear as obstacles only after scoring 100 points.
-- **Smooth Animations**: Utilises SSD1306 OLED di splay for smooth pixel graphics of about 100Hz.
+- **Smooth Animations**: Utilises SSD1306 OLED display for smooth pixel graphics of about 100Hz (theoretically)
 - **User Input**: Interactive controls with jump and duck buttons.
 
 ## Hardware Requirements
@@ -30,7 +30,7 @@ Welcome to dino-ium! This project brings the classic dinosaur game (Chrome Dino)
    - Connect push buttons to GPIO pins 0 and 11 for jump and duck; other ends connect to ground.
 
 2. **Upload the Code**:
-   - Copy the provided Python script to your Raspberry Pi Pico using an IDE like Thonny or VS Code; in development, I used ViperIDE (https://viper-ide.org/) on a ChromeBook. 
+   - Copy the provided Python script to your Raspberry Pi Pico using an IDE like Thonny or VSCode; in development, I used ViperIDE (https://viper-ide.org/) on a ChromeBook, which worked quite well.
 
 ## How to Play
 
