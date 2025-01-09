@@ -10,6 +10,9 @@ Welcome to dino-ium! This project brings the classic dinosaur game (Chrome Dino)
 - **Smooth Animations**: Utilises SSD1306 OLED display for smooth pixel graphics of about 100Hz (theoretically)
 - **User Input**: Interactive controls with jump and duck buttons.
 
+## Example Game Play (sorry the video is very bad)
+https://cloud-lkz1bzf0h-hack-club-bot.vercel.app/0video_-_2025-01-09_1_55_23_pm.mp4
+
 ## Hardware Requirements
 
 - Raspberry Pi Pico
